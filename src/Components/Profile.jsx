@@ -1,27 +1,16 @@
+import Button from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useForm, Controller } from "react-hook-form";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
-import TextField from "@mui/material/TextField";
-import Button from "@mui/material/Button";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { BASE_URL } from "./Constants";
 
-export default function Profile({ userId, setUserId, axiosAuth }) {
+export default function Profile({ userId, axiosAuth, userData }) {
   const [isEditing, setIsEditing] = useState(false);
   const queryClient = useQueryClient();
-  const { logout, user, isAuthenticated } = useAuth0();
+  const { logout, user } = useAuth0();
   const { control, handleSubmit } = useForm();
-
-  const fetcher = async (url) => (await axiosAuth.get(url)).data;
-  const { data: userData } = useQuery({
-    queryKey: ["user", `${BASE_URL}/users/${user?.email}`],
-    queryFn: () => fetcher(`${BASE_URL}/users/${user?.email}`),
-    enabled: isAuthenticated,
-  });
-
-  useEffect(() => {
-    setUserId(userData?.id);
-  }, [setUserId, userData?.id]);
 
   const putRequest = async (url, data) => await axiosAuth.put(url, data);
   const { mutate } = useMutation({
@@ -67,9 +56,11 @@ export default function Profile({ userId, setUserId, axiosAuth }) {
                 id="username"
                 label="Username"
                 variant="filled"
+                margin="normal"
               />
             )}
           />
+          <br />
           <Button type="submit" variant="contained">
             Submit
           </Button>
