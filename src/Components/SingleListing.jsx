@@ -1,18 +1,19 @@
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import InputAdornment from "@mui/material/InputAdornment";
+import { LineChart } from "@mui/x-charts/LineChart";
 import { useForm, Controller } from "react-hook-form";
+import axios from "axios";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { io } from "socket.io-client";
 import { BASE_URL, SOCKET_URL } from "./Constants";
-import { LineChart } from "@mui/x-charts/LineChart";
 import Countdown from "./Countdown";
-import axios from "axios";
 
 export default function SingleListing({ userId, axiosAuth }) {
   const [displayBid, setDisplayBid] = useState(0);
+  const [status, setStatus] = useState("");
   const queryClient = useQueryClient();
   const params = useParams();
   const {
@@ -27,6 +28,7 @@ export default function SingleListing({ userId, axiosAuth }) {
   const listing = useQuery({
     queryKey: ["listing", `${BASE_URL}/listings/${params.listingId}`],
     queryFn: () => fetcher(`${BASE_URL}/listings/${params.listingId}`),
+    refetchInterval: 30000,
   });
   const highestBid = useQuery({
     queryKey: ["highestBid", `${BASE_URL}/listings/${params.listingId}/bid`],
@@ -111,6 +113,18 @@ export default function SingleListing({ userId, axiosAuth }) {
     window.scrollTo(0, 0);
   }, [params.listingId]);
 
+  useEffect(() => {
+    if (
+      listing?.data?.status === false &&
+      listing?.data?.buyer_id == null &&
+      highestBid?.data?.bidder_id === userId
+    ) {
+      setStatus("winner");
+    } else if (listing?.data?.status === false) {
+      setStatus("closed");
+    } else setStatus("open");
+  }, [highestBid, listing, userId]);
+
   const onSubmit = (formData) => {
     const submitData = { ...formData, userId, listingId: params.listingId };
     mutate(submitData);
@@ -165,68 +179,102 @@ export default function SingleListing({ userId, axiosAuth }) {
               <div style={{ margin: "0", fontSize: "14px" }}>Buyout</div>
             </div>
           </div>
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <div style={{ paddingTop: "10px" }}>
-              <Controller
-                name="currentBid"
-                control={control}
-                defaultValue={(displayBid || initialBid) + 100}
-                rules={{
-                  required: "Enter Bid",
-                  pattern: {
-                    value: /^[0-9]+$/,
-                    message: "Please enter only numbers",
-                  },
-                  validate: {
-                    higherThanCurrentBid: (value) =>
-                      Number(value) >= Number(displayBid || initialBid) + 100 ||
-                      "Enter an amount at least $100 higher than current bid",
-                  },
-                }}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    id="currentBid"
-                    label="Bid"
-                    variant="filled"
-                    error={!!errors.currentBid}
-                    helperText={errors?.currentBid?.message}
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">$</InputAdornment>
-                      ),
-                      inputProps: { min: 0 },
+          {status === "open" ? (
+            <>
+              <form onSubmit={handleSubmit(onSubmit)}>
+                <div style={{ paddingTop: "10px" }}>
+                  <Controller
+                    name="currentBid"
+                    control={control}
+                    defaultValue={(displayBid || initialBid) + 100}
+                    rules={{
+                      required: "Enter Bid",
+                      pattern: {
+                        value: /^[0-9]+$/,
+                        message: "Please enter only numbers",
+                      },
+                      validate: {
+                        higherThanCurrentBid: (value) =>
+                          Number(value) >=
+                            Number(displayBid || initialBid) + 100 ||
+                          "Enter an amount at least $100 higher than current bid",
+                      },
                     }}
-                    fullWidth
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        id="currentBid"
+                        label="Bid"
+                        variant="filled"
+                        error={!!errors.currentBid}
+                        helperText={errors?.currentBid?.message}
+                        InputProps={{
+                          startAdornment: (
+                            <InputAdornment position="start">$</InputAdornment>
+                          ),
+                          inputProps: { min: 0 },
+                        }}
+                        fullWidth
+                      />
+                    )}
                   />
-                )}
-              />
-            </div>
+                </div>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    gap: "5px",
+                    padding: "10px",
+                  }}
+                >
+                  <Button type="submit" variant="contained" style={{ flex: 1 }}>
+                    BID NOW
+                  </Button>
+                  <Button
+                    onClick={() => buyout()}
+                    variant="contained"
+                    style={{ flex: 1 }}
+                  >
+                    BUYOUT
+                  </Button>
+                </div>
+              </form>
+              <div style={{ fontSize: "16px", paddingTop: "10px" }}>
+                Auction Ends In:
+              </div>
+              <Countdown endDate={endDate} />{" "}
+            </>
+          ) : status === "winner" ? (
             <div
               style={{
                 display: "flex",
                 justifyContent: "center",
                 gap: "5px",
                 padding: "10px",
+                paddingTop: "20px",
               }}
             >
-              <Button type="submit" variant="contained" style={{ flex: 1 }}>
-                BID NOW
-              </Button>
               <Button
-                onClick={() => buyout()}
+                onClick={() => closeBid()}
                 variant="contained"
                 style={{ flex: 1 }}
               >
-                BUYOUT
+                Close Bid
               </Button>
             </div>
-          </form>
-
-          <div style={{ fontSize: "16px", paddingTop: "10px" }}>
-            Auction Ends In:
-          </div>
-          <Countdown endDate={endDate} />
+          ) : (
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                gap: "5px",
+                padding: "10px",
+                paddingTop: "20px",
+              }}
+            >
+              Auction Closed
+            </div>
+          )}
         </div>
         <div style={{ padding: "10px" }}>
           {/* <p>Historic Trend:</p> */}
