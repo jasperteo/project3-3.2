@@ -8,6 +8,7 @@ import { useState, useEffect } from "react";
 import { io } from "socket.io-client";
 import { BASE_URL, SOCKET_URL } from "./Constants";
 import { LineChart } from "@mui/x-charts/LineChart";
+import Countdown from "./Countdown";
 
 export default function SingleListing({ userId, axiosAuth }) {
   const [displayBid, setDisplayBid] = useState(0);
@@ -62,13 +63,13 @@ export default function SingleListing({ userId, axiosAuth }) {
       }),
   });
 
-  const socket = io(`${SOCKET_URL}`);
+  // const socket = io(`${SOCKET_URL}`);
 
-  useEffect(() => {
-    socket.emit("joinRoom", params.listingId);
-    socket.on("newBid", (bid) => setDisplayBid(bid));
-    return () => socket.disconnect();
-  }, [params.listingId, socket]);
+  // useEffect(() => {
+  //   socket.emit("joinRoom", params.listingId);
+  //   socket.on("newBid", (bid) => setDisplayBid(bid));
+  //   return () => socket.disconnect();
+  // }, [params.listingId, socket]);
 
   const onSubmit = (formData) => {
     const submitData = { ...formData, userId, listingId: params.listingId };
@@ -91,139 +92,137 @@ export default function SingleListing({ userId, axiosAuth }) {
   if (listing.isError) {
     return <>Error: {listing.error.message}</>;
   }
-
+  console.log(watch.data);
+  console.log(listing.data);
   return (
     <>
-      <div className="product-info">
-        <img src={listing.data.image_link} width="400px" alt="Listing" />
-        <h1>{listing.data.title}</h1>
-      </div>
-      <div className="auction-info">
-        <p>Current Bid: ${displayBid || initialBid}</p>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <div>
-            <Controller
-              name="currentBid"
-              control={control}
-              defaultValue={(displayBid || initialBid) + 100}
-              rules={{
-                required: "Enter Bid",
-                pattern: {
-                  value: /^[0-9]+$/,
-                  message: "Please enter only numbers",
-                },
-                validate: {
-                  higherThanCurrentBid: (value) =>
-                    Number(value) >= Number(displayBid || initialBid) + 100 ||
-                    "Enter an amount at least $100 higher than current bid",
-                },
-              }}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  id="currentBid"
-                  label="Bid"
-                  variant="filled"
-                  error={!!errors.currentBid}
-                  helperText={errors?.currentBid?.message}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">$</InputAdornment>
-                    ),
-                    inputProps: { min: 0 },
-                  }}
-                />
-              )}
-            />
+      <div style={{ backgroundColor: "#d4b483" }}>
+        <div style={{ padding: "10px" }}>
+          <img src={listing?.data?.image_link} width="40%" alt="Listing" />
+          <p style={{ fontSize: "13px" }}>{watch?.data?.brand}</p>
+          <p style={{ fontSize: "16px" }}>{watch?.data?.model}</p>
+        </div>
+        <div style={{ padding: "10px" }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-around",
+              alignItems: "center",
+            }}
+          >
+            <div style={{ textAlign: "center" }}>
+              <p style={{ fontSize: "24px", margin: "0" }}>${initialBid}</p>
+              <p style={{ margin: "0", fontSize: "14px" }}>Start</p>
+            </div>
+            <div style={{ textAlign: "center" }}>
+              <p style={{ fontSize: "24px", margin: "0" }}>
+                ${displayBid || initialBid}
+              </p>
+              <p style={{ margin: "0", fontSize: "14px" }}>Current</p>
+            </div>
+            <div style={{ textAlign: "center" }}>
+              <p style={{ fontSize: "24px", margin: "0" }}>
+                ${listing.data.buyout_price}
+              </p>
+              <p style={{ margin: "0", fontSize: "14px" }}>Buyout</p>
+            </div>
           </div>
-          <Button type="submit" variant="contained">
-            BID NOW
-          </Button>
-        </form>
-        <Button variant="contained">BUYOUT</Button>
-        <Countdown endDate={endDate} />
-      </div>
-      <div className="line-chart">
-        {!!priceHistory.data && (
-          <LineChart
-            xAxis={[
-              {
-                data: dates,
-                scaleType: "time",
-                valueFormatter: (value) =>
-                  `${value.getFullYear()}-${
-                    value.getMonth() + 1
-                  }-${value.getDate()}`,
-              },
-            ]}
-            series={[
-              {
-                data: prices,
-              },
-            ]}
-            width={320}
-            height={270}
-          />
-        )}
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <div style={{ paddingTop: "10px" }}>
+              <Controller
+                name="currentBid"
+                control={control}
+                defaultValue={(displayBid || initialBid) + 100}
+                rules={{
+                  required: "Enter Bid",
+                  pattern: {
+                    value: /^[0-9]+$/,
+                    message: "Please enter only numbers",
+                  },
+                  validate: {
+                    higherThanCurrentBid: (value) =>
+                      Number(value) >= Number(displayBid || initialBid) + 100 ||
+                      "Enter an amount at least $100 higher than current bid",
+                  },
+                }}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    id="currentBid"
+                    label="Bid"
+                    variant="filled"
+                    error={!!errors.currentBid}
+                    helperText={errors?.currentBid?.message}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">$</InputAdornment>
+                      ),
+                      inputProps: { min: 0 },
+                    }}
+                    fullWidth
+                  />
+                )}
+              />
+            </div>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                gap: "5px",
+                padding: "10px",
+              }}
+            >
+              <Button type="submit" variant="contained" style={{ flex: 1 }}>
+                BID NOW
+              </Button>
+              <Button
+                onClick={(e) => {
+                  e.preventDefault();
+                }}
+                variant="contained"
+                style={{ flex: 1 }}
+              >
+                BUYOUT
+              </Button>
+            </div>
+          </form>
+
+          <p style={{ fontSize: "16px", paddingTop: "10px" }}>
+            Auction Ends In:
+          </p>
+          <Countdown endDate={endDate} />
+        </div>
+        <div style={{ padding: "10px" }}>
+          {/* <p>Historic Trend:</p> */}
+          {!!priceHistory.data && (
+            <LineChart
+              xAxis={[
+                {
+                  data: dates,
+                  scaleType: "time",
+                  valueFormatter: (value) =>
+                    `${value.getFullYear()}-${
+                      value.getMonth() + 1
+                    }-${value.getDate()}`,
+                  ticks: {
+                    fontColor: "white", // this here
+                  },
+                  gridLines: {
+                    color: "rgba(255, 255, 255, 0.2)",
+                  },
+                },
+              ]}
+              series={[
+                {
+                  data: prices,
+                },
+              ]}
+              width={360}
+              height={280}
+            />
+          )}
+        </div>
       </div>
     </>
   );
 }
-
-const Countdown = ({ endDate }) => {
-  const [timeLeft, setTimeLeft] = useState({
-    days: "0",
-    hours: "00",
-    minutes: "00",
-    seconds: "00",
-  });
-  useEffect(() => {
-    const updateCountdown = () => {
-      const now = new Date().getTime();
-      const end = new Date(endDate).getTime();
-      const timeDifference = end - now;
-
-      if (timeDifference > 0) {
-        const days = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
-        const hours = Math.floor(
-          (timeDifference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
-        );
-        const minutes = Math.floor(
-          (timeDifference % (1000 * 60 * 60)) / (1000 * 60)
-        );
-        const seconds = Math.floor((timeDifference % (1000 * 60)) / 1000);
-
-        setTimeLeft({
-          days: days.toString(),
-          hours: hours.toString().padStart(2, "0"),
-          minutes: minutes.toString().padStart(2, "0"),
-          seconds: seconds.toString().padStart(2, "0"),
-        });
-      } else {
-        setTimeLeft({
-          days: "0",
-          hours: "00",
-          minutes: "00",
-          seconds: "00",
-        });
-      }
-    };
-
-    updateCountdown();
-
-    const intervalId = setInterval(updateCountdown, 1000);
-
-    return () => clearInterval(intervalId);
-  }, [endDate]);
-
-  return (
-    <>
-      <p>Auction Ends In</p>
-      <p>
-        <iconify-icon inline icon="ant-design:reload-time-outline" />{" "}
-        {timeLeft.days} days, {timeLeft.hours} hours, {timeLeft.minutes}
-        minutes, {timeLeft.seconds} seconds
-      </p>
-    </>
-  );
-};
