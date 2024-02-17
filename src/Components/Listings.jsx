@@ -78,7 +78,8 @@ export default function Listings({ userId, axiosAuth }) {
             alignItems: "center",
             width: "100%",
             boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-          }}>
+          }}
+        >
           <FormControl size="small" sx={{ mr: 4, minWidth: 100 }}>
             <InputLabel id="watch-select-label">Watches</InputLabel>
             <Controller
@@ -112,11 +113,12 @@ export default function Listings({ userId, axiosAuth }) {
           <Button
             // size="small"
             variant="contained"
-            onClick={handleSubmit(onSubmit)}>
+            onClick={handleSubmit(onSubmit)}
+          >
             Update
           </Button>
         </Box>
-        {listings.data?.map((listing, index) => (
+        {listings?.data?.map((listing, index) => (
           <Grid item xs={index % 3 === 0 ? 12 : 6} key={listing.id}>
             <Link to={`/listings/${listing.id}`}>
               <Card
@@ -131,18 +133,22 @@ export default function Listings({ userId, axiosAuth }) {
                   display: "flex",
                   flexDirection: "column",
                   justifyContent: "center",
-                }}>
+                }}
+              >
                 <CardContent>
                   <Box
                     sx={{
                       alignItems: "center",
-                    }}>
+                    }}
+                  >
                     <div
-                      style={{ fontSize: index % 3 !== 0 ? "0.6rem" : "1rem" }}>
+                      style={{ fontSize: index % 3 !== 0 ? "0.6rem" : "1rem" }}
+                    >
                       Auction Time Left:
                     </div>
                     <div
-                      style={{ fontSize: index % 3 !== 0 ? "0.6rem" : "1rem" }}>
+                      style={{ fontSize: index % 3 !== 0 ? "0.6rem" : "1rem" }}
+                    >
                       <Countdown endDate={listing.ending_at} />
                     </div>
                   </Box>
@@ -156,7 +162,8 @@ export default function Listings({ userId, axiosAuth }) {
                       display: "block",
                       objectFit: "cover",
                       margin: "auto",
-                    }}></CardMedia>
+                    }}
+                  ></CardMedia>
                   <p style={{ fontSize: index % 3 !== 0 ? "0.6rem" : "1rem" }}>
                     {listing.watch.model}
                   </p>
