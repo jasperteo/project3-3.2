@@ -63,13 +63,13 @@ export default function SingleListing({ userId, axiosAuth }) {
       }),
   });
 
-  // const socket = io(`${SOCKET_URL}`);
+  const socket = io(`${SOCKET_URL}`);
 
-  // useEffect(() => {
-  //   socket.emit("joinRoom", params.listingId);
-  //   socket.on("newBid", (bid) => setDisplayBid(bid));
-  //   return () => socket.disconnect();
-  // }, [params.listingId, socket]);
+  useEffect(() => {
+    socket.emit("joinRoom", params.listingId);
+    socket.on("newBid", (bid) => setDisplayBid(bid));
+    return () => socket.disconnect();
+  }, [params.listingId, socket]);
 
   const onSubmit = (formData) => {
     const submitData = { ...formData, userId, listingId: params.listingId };
