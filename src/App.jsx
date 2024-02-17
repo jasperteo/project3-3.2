@@ -10,10 +10,11 @@ import Login from "./Components/Login";
 import Listings from "./Components/Listings";
 import SingleListing from "./Components/SingleListing";
 import Payment from "./Components/Payment";
+import { BASE_URL } from "./Components/Constants";
 
 export default function App() {
   const [userId, setUserId] = useState("");
-  const { getAccessTokenSilently, isAuthenticated } = useAuth0();
+  const { getAccessTokenSilently, isAuthenticated, user } = useAuth0();
 
   const { data: accessToken } = useQuery({
     queryKey: ["accessToken"],
@@ -23,10 +24,20 @@ export default function App() {
       }),
     enabled: isAuthenticated,
   });
-
   const axiosAuth = axios.create({
     headers: { Authorization: `Bearer ${accessToken}` },
   });
+
+  const fetcher = async (url) => (await axiosAuth.get(url)).data;
+  const { data: userData } = useQuery({
+    queryKey: ["user", `${BASE_URL}/users/${user?.email}`],
+    queryFn: () => fetcher(`${BASE_URL}/users/${user?.email}`),
+    enabled: isAuthenticated,
+  });
+
+  useEffect(() => {
+    setUserId(userData?.id);
+  }, [userData?.id]);
 
   const router = createBrowserRouter([
     {
@@ -57,20 +68,16 @@ export default function App() {
       path: "/profile",
       element: (
         <>
-          <Profile
-            userId={userId}
-            setUserId={setUserId}
-            axiosAuth={axiosAuth}
-          />
+          <Profile userId={userId} userData={userData} axiosAuth={axiosAuth} />
           <NavBar userId={userId} axiosAuth={axiosAuth} />
         </>
       ),
     },
     {
-      path: "/payment",
+      path: "/payment/:listingId",
       element: (
         <>
-          <Payment />
+          <Payment userId={userId} axiosAuth={axiosAuth} />
           <NavBar userId={userId} axiosAuth={axiosAuth} />
         </>
       ),
