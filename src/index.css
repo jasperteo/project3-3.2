@@ -5,8 +5,7 @@
 
   color-scheme: light dark;
   color: #353839;
-  background-color: #e6c7d9;
-
+  background-color: #f4f2f2;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -23,12 +22,19 @@ a:hover {
   color: #535bf2;
 }
 
+p {
+  margin: 0; /* Remove margin */
+  padding: 0; /* Remove padding */
+  color: azure;
+}
+
 body {
   margin: 0;
   display: flex;
-  place-items: center;
+  /* place-items: center; */
   min-width: 320px;
   min-height: 100vh;
+  color: azure;
 }
 
 h1 {
