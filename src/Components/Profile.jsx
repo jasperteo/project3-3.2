@@ -76,7 +76,7 @@ export default function Profile({ userId, setUserId, axiosAuth }) {
         </form>
       ) : (
         <>
-          <div>Username: {userData?.username || "Please enter username"} </div>
+          <h3>Username: {userData?.username || "Please enter username"} </h3>
           <Button variant="contained" onClick={() => setIsEditing(true)}>
             Edit Profile
           </Button>

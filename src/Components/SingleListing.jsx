@@ -9,6 +9,7 @@ import { io } from "socket.io-client";
 import { BASE_URL, SOCKET_URL } from "./Constants";
 import { LineChart } from "@mui/x-charts/LineChart";
 import Countdown from "./Countdown";
+import axios from "axios";
 
 export default function SingleListing({ userId, axiosAuth }) {
   const [displayBid, setDisplayBid] = useState(0);
@@ -21,10 +22,15 @@ export default function SingleListing({ userId, axiosAuth }) {
     reset,
   } = useForm();
 
+  //GET Data
   const fetcher = async (url) => (await axiosAuth.get(url)).data;
   const listing = useQuery({
     queryKey: ["listing", `${BASE_URL}/listings/${params.listingId}`],
     queryFn: () => fetcher(`${BASE_URL}/listings/${params.listingId}`),
+  });
+  const highestBid = useQuery({
+    queryKey: ["highestBid", `${BASE_URL}/listings/${params.listingId}/bid`],
+    queryFn: () => fetcher(`${BASE_URL}/listings/${params.listingId}/bid`),
   });
   const watch = useQuery({
     queryKey: ["watch", `${BASE_URL}/watches/${listing?.data?.watch_id}`],
@@ -40,25 +46,30 @@ export default function SingleListing({ userId, axiosAuth }) {
       fetcher(`${BASE_URL}/watches/${listing?.data?.watch_id}/historicPrices`),
     enabled: listing.isSuccess,
   });
-  const highestBid = useQuery({
-    queryKey: ["highestBid", `${BASE_URL}/listings/${params.listingId}/bid`],
-    queryFn: () => fetcher(`${BASE_URL}/listings/${params.listingId}/bid`),
-  });
 
+  //Show bid amount, use starting bid if no one has started bidding
   const initialBid =
     highestBid?.data?.current_bid ?? listing?.data?.starting_bid;
+
+  //Data for graphing
   const prices = priceHistory?.data?.map((item) => item.price);
   const dates = priceHistory?.data?.map((item) => new Date(item.transacted_at));
 
+  //Data for countdown
+  const endDate = listing?.data?.ending_at;
+
+  //Place Bid
   const putRequest = async (url, data) => await axiosAuth.put(url, data);
   const { mutate } = useMutation({
     mutationFn: (formData) =>
       putRequest(`${BASE_URL}/listings/${params.listingId}/bid`, formData),
     onSuccess: (res) => {
+      //Store in cache
       queryClient.setQueryData(
         ["highestBid", `${BASE_URL}/listings/${params.listingId}/bid`],
         res.data
       );
+      //Revalidate source of truth
       queryClient.invalidateQueries({
         queryKey: [
           "highestBid",
@@ -68,23 +79,44 @@ export default function SingleListing({ userId, axiosAuth }) {
     },
   });
 
-  // const socket = io(`${SOCKET_URL}`);
+  //Post requests for stripe payment
+  const postRequest = async (url, data) => await axios.post(url, data);
+  const { mutate: buyout } = useMutation({
+    mutationFn: () =>
+      postRequest(`${BASE_URL}/buyout`, {
+        listingId: params.listingId,
+        watchName: watch?.data?.model,
+      }),
+    onSuccess: (res) => (window.location = res.data.url),
+  });
+  const { mutate: closeBid } = useMutation({
+    mutationFn: () =>
+      postRequest(`${BASE_URL}/closeBid`, {
+        listingId: params.listingId,
+        watchName: watch?.data?.model,
+      }),
+    onSuccess: (res) => (window.location = res.data.url),
+  });
 
-  // useEffect(() => {
-  //   socket.emit("joinRoom", params.listingId);
-  //   socket.on("newBid", (bid) => setDisplayBid(bid));
-  //   return () => socket.disconnect();
-  // }, [params.listingId, socket]);
+  //Socket to communicate and recieve bids
+  const socket = io(`${SOCKET_URL}`);
+  useEffect(() => {
+    socket.emit("joinRoom", params.listingId);
+    socket.on("newBid", (bid) => setDisplayBid(bid));
+    return () => socket.disconnect();
+  }, [params.listingId, socket]);
+
+  //Scroll to top
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [params.listingId]);
 
   const onSubmit = (formData) => {
     const submitData = { ...formData, userId, listingId: params.listingId };
-    console.log(submitData);
     mutate(submitData);
     socket.emit("submitBid", submitData);
     reset();
   };
-
-  const endDate = listing?.data?.ending_at;
 
   if (listing.isLoading) {
     return (
@@ -97,15 +129,14 @@ export default function SingleListing({ userId, axiosAuth }) {
   if (listing.isError) {
     return <>Error: {listing.error.message}</>;
   }
-  console.log(watch.data);
-  console.log(listing.data);
+
   return (
     <>
       <div style={{ backgroundColor: "#d4b483" }}>
         <div style={{ padding: "10px" }}>
           <img src={listing?.data?.image_link} width="40%" alt="Listing" />
-          <p style={{ fontSize: "13px" }}>{watch?.data?.brand}</p>
-          <p style={{ fontSize: "16px" }}>{watch?.data?.model}</p>
+          <div style={{ fontSize: "13px" }}>{watch?.data?.brand}</div>
+          <div style={{ fontSize: "16px" }}>{watch?.data?.model}</div>
         </div>
         <div style={{ padding: "10px" }}>
           <div
@@ -113,23 +144,24 @@ export default function SingleListing({ userId, axiosAuth }) {
               display: "flex",
               justifyContent: "space-around",
               alignItems: "center",
-            }}
-          >
+            }}>
             <div style={{ textAlign: "center" }}>
-              <p style={{ fontSize: "24px", margin: "0" }}>${initialBid}</p>
-              <p style={{ margin: "0", fontSize: "14px" }}>Start</p>
+              <div style={{ fontSize: "24px", margin: "0" }}>
+                ${listing?.data?.starting_bid}
+              </div>
+              <div style={{ margin: "0", fontSize: "14px" }}>Start</div>
             </div>
             <div style={{ textAlign: "center" }}>
-              <p style={{ fontSize: "24px", margin: "0" }}>
+              <div style={{ fontSize: "24px", margin: "0" }}>
                 ${displayBid || initialBid}
-              </p>
-              <p style={{ margin: "0", fontSize: "14px" }}>Current</p>
+              </div>
+              <div style={{ margin: "0", fontSize: "14px" }}>Current</div>
             </div>
             <div style={{ textAlign: "center" }}>
-              <p style={{ fontSize: "24px", margin: "0" }}>
+              <div style={{ fontSize: "24px", margin: "0" }}>
                 ${listing.data.buyout_price}
-              </p>
-              <p style={{ margin: "0", fontSize: "14px" }}>Buyout</p>
+              </div>
+              <div style={{ margin: "0", fontSize: "14px" }}>Buyout</div>
             </div>
           </div>
           <form onSubmit={handleSubmit(onSubmit)}>
@@ -175,26 +207,22 @@ export default function SingleListing({ userId, axiosAuth }) {
                 justifyContent: "center",
                 gap: "5px",
                 padding: "10px",
-              }}
-            >
+              }}>
               <Button type="submit" variant="contained" style={{ flex: 1 }}>
                 BID NOW
               </Button>
               <Button
-                onClick={(e) => {
-                  e.preventDefault();
-                }}
+                onClick={() => buyout()}
                 variant="contained"
-                style={{ flex: 1 }}
-              >
+                style={{ flex: 1 }}>
                 BUYOUT
               </Button>
             </div>
           </form>
 
-          <p style={{ fontSize: "16px", paddingTop: "10px" }}>
+          <div style={{ fontSize: "16px", paddingTop: "10px" }}>
             Auction Ends In:
-          </p>
+          </div>
           <Countdown endDate={endDate} />
         </div>
         <div style={{ padding: "10px" }}>

@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
-// import iconify from "@iconify/react";
 
-const Countdown = ({ endDate }) => {
+export default function Countdown({ endDate }) {
   const [timeLeft, setTimeLeft] = useState({
     days: "0",
     hours: "00",
@@ -49,13 +48,11 @@ const Countdown = ({ endDate }) => {
 
   return (
     <>
-      <p>
-        <iconify-icon inline icon="ant-design:reload-time-outline" />{" "}
+      <div>
+        <iconify-icon inline icon="ant-design:reload-time-outline" />
         {timeLeft.days} days, {timeLeft.hours} hours, {timeLeft.minutes}
         minutes, {timeLeft.seconds} seconds
-      </p>
+      </div>
     </>
   );
-};
-
-export default Countdown;
+}

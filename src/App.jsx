@@ -9,6 +9,7 @@ import NavBar from "./Components/NavBar";
 import Login from "./Components/Login";
 import Listings from "./Components/Listings";
 import SingleListing from "./Components/SingleListing";
+import Payment from "./Components/Payment";
 
 export default function App() {
   const [userId, setUserId] = useState("");
@@ -22,10 +23,6 @@ export default function App() {
       }),
     enabled: isAuthenticated,
   });
-
-  useEffect(() => {
-    console.log(accessToken);
-  }, [accessToken]);
 
   const axiosAuth = axios.create({
     headers: { Authorization: `Bearer ${accessToken}` },
@@ -65,6 +62,15 @@ export default function App() {
             setUserId={setUserId}
             axiosAuth={axiosAuth}
           />
+          <NavBar userId={userId} axiosAuth={axiosAuth} />
+        </>
+      ),
+    },
+    {
+      path: "/payment",
+      element: (
+        <>
+          <Payment />
           <NavBar userId={userId} axiosAuth={axiosAuth} />
         </>
       ),
