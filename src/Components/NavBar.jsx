@@ -58,16 +58,19 @@ export default function NavBar({ userId, axiosAuth }) {
     queryFn: () => fetcher(`${BASE_URL}/watches`),
   });
 
-  const postRequest = async (url, data) => {
-    const res = await axiosAuth.post(url, data);
-    navigate(`/listings/${res.data.id}`);
-  };
+  const postRequest = async (url, data) => await axiosAuth.post(url, data);
   const { mutate } = useMutation({
     mutationFn: (formData) => postRequest(`${BASE_URL}/listings`, formData),
-    onSuccess: () =>
+    onSuccess: (res) => {
       queryClient.invalidateQueries({
         queryKey: ["listings", `${BASE_URL}/listings`],
-      }),
+      });
+      queryClient.setQueryData(
+        ["listing", `${BASE_URL}/listings/${res.data.id}`],
+        res.data
+      );
+      navigate(`/listings/${res.data.id}`);
+    },
   });
 
   const onSubmit = async (formData) => {
@@ -88,12 +91,6 @@ export default function NavBar({ userId, axiosAuth }) {
     }
     reset();
     setOpen(false);
-    console.log({
-      ...formData,
-      imageLink: url,
-      userId: userId,
-      endingAt: formData.endingAt.$d,
-    });
   };
 
   const ListFormDialog = () => (
@@ -216,8 +213,7 @@ export default function NavBar({ userId, axiosAuth }) {
             <FormControl
               variant="filled"
               sx={{ m: 1, minWidth: 250 }}
-              error={!!errors.watchId}
-            >
+              error={!!errors.watchId}>
               <InputLabel>Watch</InputLabel>
               <Controller
                 name="watchId"
@@ -267,8 +263,7 @@ export default function NavBar({ userId, axiosAuth }) {
                   component="label"
                   endIcon={
                     <iconify-icon icon="ant-design:cloud-upload-outlined" />
-                  }
-                >
+                  }>
                   Upload Image
                   <input
                     style={{ display: "none" }}
@@ -285,8 +280,7 @@ export default function NavBar({ userId, axiosAuth }) {
         <Button onClick={() => setOpen(false)}>Cancel</Button>
         <Button
           onClick={handleSubmit(onSubmit)}
-          endIcon={<iconify-icon icon="ant-design:send-outlined" />}
-        >
+          endIcon={<iconify-icon icon="ant-design:send-outlined" />}>
           Submit
         </Button>
       </DialogActions>
@@ -301,16 +295,14 @@ export default function NavBar({ userId, axiosAuth }) {
           bottom: 0,
           left: 0,
           right: 0,
-        }}
-      >
+        }}>
         <BottomNavigation
           sx={{ bgcolor: "#e2dfdf" }}
           showLabels
           value={value}
           onChange={(e, newValue) =>
             newValue !== 1 ? setValue(newValue) : null
-          }
-        >
+          }>
           <BottomNavigationAction
             sx={{ "*": { color: value === 0 ? "#f76c6c" : "#24305E" } }}
             component={Link}
