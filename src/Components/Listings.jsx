@@ -67,8 +67,6 @@ export default function Listings({ userId, axiosAuth }) {
   //Add useEffect for MUI Snackbar for notifying liked watches when listed after socket.io is set up (Low priority)
   const cardColors = ["#A8D0E6", "#374785", "#f76c6c", "#d4b483", "#24305E"];
 
-  console.log(wishlist.data);
-
   return (
     <>
       <Grid container spacing={0}>
@@ -80,8 +78,7 @@ export default function Listings({ userId, axiosAuth }) {
             alignItems: "center",
             width: "100%",
             boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-          }}
-        >
+          }}>
           <FormControl size="small" sx={{ mr: 4, minWidth: 100 }}>
             <InputLabel id="watch-select-label">Watches</InputLabel>
             <Controller
@@ -115,8 +112,7 @@ export default function Listings({ userId, axiosAuth }) {
           <Button
             // size="small"
             variant="contained"
-            onClick={handleSubmit(onSubmit)}
-          >
+            onClick={handleSubmit(onSubmit)}>
             Update
           </Button>
         </Box>
@@ -135,24 +131,20 @@ export default function Listings({ userId, axiosAuth }) {
                   display: "flex",
                   flexDirection: "column",
                   justifyContent: "center",
-                }}
-              >
+                }}>
                 <CardContent>
                   <Box
                     sx={{
                       alignItems: "center",
-                    }}
-                  >
-                    <p
-                      style={{ fontSize: index % 3 !== 0 ? "0.6rem" : "1rem" }}
-                    >
+                    }}>
+                    <div
+                      style={{ fontSize: index % 3 !== 0 ? "0.6rem" : "1rem" }}>
                       Auction Time Left:
-                    </p>
-                    <p
-                      style={{ fontSize: index % 3 !== 0 ? "0.6rem" : "1rem" }}
-                    >
+                    </div>
+                    <div
+                      style={{ fontSize: index % 3 !== 0 ? "0.6rem" : "1rem" }}>
                       <Countdown endDate={listing.ending_at} />
-                    </p>
+                    </div>
                   </Box>
 
                   <CardMedia
@@ -164,8 +156,7 @@ export default function Listings({ userId, axiosAuth }) {
                       display: "block",
                       objectFit: "cover",
                       margin: "auto",
-                    }}
-                  ></CardMedia>
+                    }}></CardMedia>
                   <p style={{ fontSize: index % 3 !== 0 ? "0.6rem" : "1rem" }}>
                     {listing.watch.model}
                   </p>

@@ -20,19 +20,22 @@ export default function Profile({ userId, setUserId, axiosAuth }) {
   });
 
   useEffect(() => {
-    console.log(user);
     setUserId(userData?.id);
-    console.log(userData);
-  }, [setUserId, user, userData]);
+  }, [setUserId, userData?.id]);
 
   const putRequest = async (url, data) => await axiosAuth.put(url, data);
   const { mutate } = useMutation({
     mutationFn: (formData) =>
       putRequest(`${BASE_URL}/users/${userId}`, formData),
-    onSuccess: () =>
+    onSuccess: (res) => {
+      queryClient.setQueryData(
+        ["user", `${BASE_URL}/users/${user?.email}`],
+        res.data
+      );
       queryClient.invalidateQueries({
         queryKey: ["user", `${BASE_URL}/users/${user?.email}`],
-      }),
+      });
+    },
   });
 
   const onSubmit = (formData) => {
@@ -73,7 +76,7 @@ export default function Profile({ userId, setUserId, axiosAuth }) {
         </form>
       ) : (
         <>
-          <div>Username: {userData?.username || "Please enter username"} </div>
+          <h3>Username: {userData?.username || "Please enter username"} </h3>
           <Button variant="contained" onClick={() => setIsEditing(true)}>
             Edit Profile
           </Button>
