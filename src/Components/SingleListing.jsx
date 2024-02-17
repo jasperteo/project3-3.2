@@ -53,13 +53,18 @@ export default function SingleListing({ userId, axiosAuth }) {
   const { mutate } = useMutation({
     mutationFn: (formData) =>
       putRequest(`${BASE_URL}/listings/${params.listingId}/bid`, formData),
-    onSuccess: () =>
+    onSuccess: (res) => {
+      queryClient.setQueryData(
+        ["highestBid", `${BASE_URL}/listings/${params.listingId}/bid`],
+        res.data
+      );
       queryClient.invalidateQueries({
         queryKey: [
           "highestBid",
           `${BASE_URL}/listings/${params.listingId}/bid`,
         ],
-      }),
+      });
+    },
   });
 
   const socket = io(`${SOCKET_URL}`);

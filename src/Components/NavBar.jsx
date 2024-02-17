@@ -58,16 +58,19 @@ export default function NavBar({ userId, axiosAuth }) {
     queryFn: () => fetcher(`${BASE_URL}/watches`),
   });
 
-  const postRequest = async (url, data) => {
-    const res = await axiosAuth.post(url, data);
-    navigate(`/listings/${res.data.id}`);
-  };
+  const postRequest = async (url, data) => await axiosAuth.post(url, data);
   const { mutate } = useMutation({
     mutationFn: (formData) => postRequest(`${BASE_URL}/listings`, formData),
-    onSuccess: () =>
+    onSuccess: (res) => {
       queryClient.invalidateQueries({
         queryKey: ["listings", `${BASE_URL}/listings`],
-      }),
+      });
+      queryClient.setQueryData(
+        ["listing", `${BASE_URL}/listings/${res.data.id}`],
+        res.data
+      );
+      navigate(`/listings/${res.data.id}`);
+    },
   });
 
   const onSubmit = async (formData) => {
