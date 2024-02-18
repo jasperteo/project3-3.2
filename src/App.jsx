@@ -24,6 +24,7 @@ export default function App() {
       }),
     enabled: isAuthenticated,
   });
+
   const axiosAuth = axios.create({
     headers: { Authorization: `Bearer ${accessToken}` },
   });
