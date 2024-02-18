@@ -50,18 +50,14 @@ export default function App() {
       element: (
         <>
           <Outlet />
-          <Listings userId={userId} axiosAuth={axiosAuth} />
+          <Listings axiosAuth={axiosAuth} />
           <NavBar userId={userId} axiosAuth={axiosAuth} />
         </>
       ),
       children: [
         {
           path: ":listingId",
-          element: (
-            <>
-              <SingleListing userId={userId} axiosAuth={axiosAuth} />
-            </>
-          ),
+          element: <SingleListing userId={userId} axiosAuth={axiosAuth} />,
         },
       ],
     },
@@ -85,9 +81,5 @@ export default function App() {
     },
   ]);
 
-  return (
-    <>
-      <RouterProvider router={router} />
-    </>
-  );
+  return <RouterProvider router={router} />;
 }

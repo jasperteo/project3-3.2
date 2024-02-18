@@ -1,7 +1,7 @@
-import { useNavigate } from "react-router-dom";
-import { useAuth0 } from "@auth0/auth0-react";
 import Button from "@mui/material/Button";
 import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth0 } from "@auth0/auth0-react";
 
 export default function Login() {
   const { loginWithRedirect, isAuthenticated } = useAuth0();
@@ -15,11 +15,14 @@ export default function Login() {
   const LoginButton = () => (
     <Button
       variant="contained"
-      style={{
-        backgroundColor: "#f78888",
+      sx={{
+        flex: 1,
+        bgcolor: "#A6D9F7",
+        color: "inherit",
+        fontFamily: "inherit",
+        fontWeight: "550",
       }}
-      onClick={() => loginWithRedirect()}
-    >
+      onClick={() => loginWithRedirect()}>
       Log In
     </Button>
   );

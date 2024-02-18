@@ -26,8 +26,7 @@ import {
 } from "firebase/storage";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { storage } from "./FirebaseConfig";
-import { BASE_URL, SOCKET_URL } from "./Constants";
-import { io } from "socket.io-client";
+import { BASE_URL } from "./Constants";
 
 export default function NavBar({ userId, axiosAuth }) {
   const queryClient = useQueryClient();
@@ -74,7 +73,6 @@ export default function NavBar({ userId, axiosAuth }) {
     },
   });
 
-  // const socket = io(`${SOCKET_URL}`);
   const onSubmit = async (formData) => {
     let url = "";
     if (formData.imageLink) {
@@ -91,15 +89,14 @@ export default function NavBar({ userId, axiosAuth }) {
         endingAt: formData.endingAt.$d,
       });
     }
-    // socket.emit("newWatchListed", formData.watchId);
     reset();
     setOpen(false);
   };
 
   const ListFormDialog = () => (
     <Dialog open={open} onClose={() => setOpen(false)}>
-      <DialogTitle sx={{ bgcolor: "#ebecf0" }}>List Item!</DialogTitle>
-      <DialogContent sx={{ bgcolor: "#ebecf0" }}>
+      <DialogTitle sx={{ bgcolor: "#F4EBD9" }}>List Item!</DialogTitle>
+      <DialogContent sx={{ bgcolor: "#F4EBD9" }}>
         <form>
           <div>
             <Controller
@@ -216,8 +213,7 @@ export default function NavBar({ userId, axiosAuth }) {
             <FormControl
               variant="filled"
               sx={{ m: 1, minWidth: 250 }}
-              error={!!errors.watchId}
-            >
+              error={!!errors.watchId}>
               <InputLabel>Watch</InputLabel>
               <Controller
                 name="watchId"
@@ -267,8 +263,7 @@ export default function NavBar({ userId, axiosAuth }) {
                   component="label"
                   endIcon={
                     <iconify-icon icon="ant-design:cloud-upload-outlined" />
-                  }
-                >
+                  }>
                   Upload Image
                   <input
                     style={{ display: "none" }}
@@ -281,12 +276,11 @@ export default function NavBar({ userId, axiosAuth }) {
           </p>
         </form>
       </DialogContent>
-      <DialogActions sx={{ bgcolor: "#ebecf0" }}>
+      <DialogActions sx={{ bgcolor: "#F4EBD9" }}>
         <Button onClick={() => setOpen(false)}>Cancel</Button>
         <Button
           onClick={handleSubmit(onSubmit)}
-          endIcon={<iconify-icon icon="ant-design:send-outlined" />}
-        >
+          endIcon={<iconify-icon icon="ant-design:send-outlined" />}>
           Submit
         </Button>
       </DialogActions>
@@ -301,18 +295,16 @@ export default function NavBar({ userId, axiosAuth }) {
           bottom: 0,
           left: 0,
           right: 0,
-        }}
-      >
+        }}>
         <BottomNavigation
-          sx={{ bgcolor: "#e2dfdf" }}
+          sx={{ bgcolor: "#D6EEFF" }}
           showLabels
           value={value}
           onChange={(e, newValue) =>
             newValue !== 1 ? setValue(newValue) : null
-          }
-        >
+          }>
           <BottomNavigationAction
-            sx={{ "*": { color: value === 0 ? "#f76c6c" : "#24305E" } }}
+            sx={{ "*": { color: value === 0 ? "#B8336A" : "#1F2232" } }}
             component={Link}
             to="/listings"
             label="Home"
@@ -325,7 +317,7 @@ export default function NavBar({ userId, axiosAuth }) {
             icon={<iconify-icon icon="ant-design:plus-circle-twotone" />}
           />
           <BottomNavigationAction
-            sx={{ "*": { color: value === 2 ? "#f76c6c" : "#24305E" } }}
+            sx={{ "*": { color: value === 2 ? "#B8336A" : "#1F2232" } }}
             component={Link}
             to="/profile"
             label="Profile"

@@ -1,5 +1,6 @@
-import TextField from "@mui/material/TextField";
+import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
 import InputAdornment from "@mui/material/InputAdornment";
 import { LineChart } from "@mui/x-charts/LineChart";
 import { useForm, Controller } from "react-hook-form";
@@ -14,6 +15,7 @@ import Countdown from "./Countdown";
 export default function SingleListing({ userId, axiosAuth }) {
   const [displayBid, setDisplayBid] = useState(0);
   const [status, setStatus] = useState("");
+  const [socketBid, setSocketBid] = useState();
   const queryClient = useQueryClient();
   const params = useParams();
   const {
@@ -28,7 +30,7 @@ export default function SingleListing({ userId, axiosAuth }) {
   const listing = useQuery({
     queryKey: ["listing", `${BASE_URL}/listings/${params.listingId}`],
     queryFn: () => fetcher(`${BASE_URL}/listings/${params.listingId}`),
-    refetchInterval: 30000,
+    refetchInterval: 10000,
   });
   const highestBid = useQuery({
     queryKey: ["highestBid", `${BASE_URL}/listings/${params.listingId}/bid`],
@@ -101,16 +103,14 @@ export default function SingleListing({ userId, axiosAuth }) {
   });
 
   //Socket to communicate and recieve bids
-  const socket = io(`${SOCKET_URL}`);
+
   useEffect(() => {
+    const socket = io(`${SOCKET_URL}`);
+    setSocketBid(socket);
+    window.scrollTo(0, 0);
     socket.emit("joinRoom", params.listingId);
     socket.on("newBid", (bid) => setDisplayBid(bid));
     return () => socket.disconnect();
-  }, [params.listingId, socket]);
-
-  //Scroll to top
-  useEffect(() => {
-    window.scrollTo(0, 0);
   }, [params.listingId]);
 
   useEffect(() => {
@@ -128,7 +128,7 @@ export default function SingleListing({ userId, axiosAuth }) {
   const onSubmit = (formData) => {
     const submitData = { ...formData, userId, listingId: params.listingId };
     mutate(submitData);
-    socket.emit("submitBid", submitData);
+    socketBid.emit("submitBid", submitData);
     reset();
   };
 
@@ -146,58 +146,71 @@ export default function SingleListing({ userId, axiosAuth }) {
 
   return (
     <>
-      <div style={{ backgroundColor: "#f78888" }}>
-        <div style={{ padding: "10px" }}>
-          <img src={listing?.data?.image_link} width="30%" alt="Listing" />
-          <div style={{ fontSize: "13px" }}>{watch?.data?.brand}</div>
-          <div style={{ fontSize: "16px" }}>{watch?.data?.model}</div>
-          <div style={{ fontSize: "16px" }}>
+      <Box sx={{ bgcolor: "#CFE0C3" }}>
+        <div style={{ padding: "0.6em" }}>
+          <img
+            src={listing?.data?.image_link}
+            style={{ maxHeight: "30em" }}
+            alt="Listing"
+          />
+          <div style={{ fontSize: "0.8em" }}>{watch?.data?.brand}</div>
+          <div style={{ fontSize: "1em", fontWeight: "600" }}>
+            {watch?.data?.model}
+          </div>
+          <div
+            style={{
+              fontSize: "1em",
+              fontWeight: "600",
+              paddingBottom: "2em",
+            }}>
+            Ref No. {watch?.data?.ref_num}
+          </div>
+          <div style={{ fontSize: "1em", fontWeight: "600" }}>
+            Title:
+            <br /> {listing?.data?.title}
+          </div>
+          <div style={{ fontSize: "0.9em" }}>
             Description:
             <br /> {listing?.data?.description}
           </div>
         </div>
         <div
           style={{
-            padding: "10px",
-            paddingTop: "20px",
-          }}
-        >
+            padding: "0.75em",
+            paddingTop: "1.25em",
+          }}>
           <div
             style={{
               display: "flex",
               justifyContent: "space-around",
               alignItems: "center",
-            }}
-          >
+            }}>
             <div style={{ textAlign: "center" }}>
               <div
-                style={{ fontSize: "24px", margin: "0", fontWeight: "bold" }}
-              >
+                style={{ fontSize: "1.5em", margin: "0", fontWeight: "bold" }}>
                 ${listing?.data?.starting_bid}
               </div>
-              <div style={{ margin: "0", fontSize: "14px" }}>Start</div>
+              <div style={{ margin: "0", fontSize: "0.9em" }}>Start</div>
             </div>
             <div style={{ textAlign: "center" }}>
               <div
-                style={{ fontSize: "24px", margin: "0", fontWeight: "bold" }}
-              >
+                style={{ fontSize: "1.5em", margin: "0", fontWeight: "bold" }}>
                 ${displayBid || initialBid}
               </div>
-              <div style={{ margin: "0", fontSize: "14px" }}>Current</div>
+              <div style={{ margin: "0", fontSize: "0.9em" }}>Current</div>
             </div>
             <div style={{ textAlign: "center" }}>
               <div
-                style={{ fontSize: "24px", margin: "0", fontWeight: "bold" }}
-              >
+                style={{ fontSize: "1.5em", margin: "0", fontWeight: "bold" }}>
                 ${listing.data.buyout_price}
               </div>
-              <div style={{ margin: "0", fontSize: "14px" }}>Buyout</div>
+              <div style={{ margin: "0", fontSize: "0.9em" }}>Buyout</div>
             </div>
           </div>
           {status === "open" ? (
             <>
               <form onSubmit={handleSubmit(onSubmit)}>
-                <div style={{ paddingTop: "10px" }}>
+                <div style={{ paddingTop: "0.75em" }}>
                   <Controller
                     name="currentBid"
                     control={control}
@@ -238,37 +251,36 @@ export default function SingleListing({ userId, axiosAuth }) {
                   style={{
                     display: "flex",
                     justifyContent: "center",
-                    gap: "5px",
-                    padding: "10px",
-                  }}
-                >
+                    gap: "0.3em",
+                    padding: "0.75em",
+                  }}>
                   <Button
                     type="submit"
                     variant="contained"
-                    style={{
+                    sx={{
                       flex: 1,
-                      backgroundColor: "#f3d250",
-                      color: "#f78888",
-                      fontWeight: "bold",
-                    }}
-                  >
+                      bgcolor: "#A6D9F7",
+                      color: "inherit",
+                      fontFamily: "inherit",
+                      fontWeight: "550",
+                    }}>
                     BID NOW
                   </Button>
                   <Button
                     onClick={() => buyout()}
                     variant="contained"
-                    style={{
+                    sx={{
                       flex: 1,
-                      backgroundColor: "#f3d250",
-                      color: "#f78888",
-                      fontWeight: "bold",
-                    }}
-                  >
+                      bgcolor: "#A6D9F7",
+                      color: "inherit",
+                      fontFamily: "inherit",
+                      fontWeight: "550",
+                    }}>
                     BUYOUT
                   </Button>
                 </div>
               </form>
-              <div style={{ fontSize: "16px", paddingTop: "10px" }}>
+              <div style={{ fontSize: "1em", paddingTop: "0.75em" }}>
                 Auction Ends In:
               </div>
               <Countdown endDate={endDate} />{" "}
@@ -278,16 +290,20 @@ export default function SingleListing({ userId, axiosAuth }) {
               style={{
                 display: "flex",
                 justifyContent: "center",
-                gap: "5px",
-                padding: "10px",
-                paddingTop: "20px",
-              }}
-            >
+                gap: "0.3em",
+                padding: "0.75em",
+                paddingTop: "1.25",
+              }}>
               <Button
                 onClick={() => closeBid()}
                 variant="contained"
-                style={{ flex: 1 }}
-              >
+                sx={{
+                  flex: 1,
+                  bgcolor: "#A6D9F7",
+                  color: "inherit",
+                  fontFamily: "inherit",
+                  fontWeight: "550",
+                }}>
                 Close Bid
               </Button>
             </div>
@@ -296,19 +312,20 @@ export default function SingleListing({ userId, axiosAuth }) {
               style={{
                 display: "flex",
                 justifyContent: "center",
-                gap: "5px",
-                padding: "10px",
-                paddingTop: "20px",
-              }}
-            >
+                gap: "0.3em",
+                padding: "0.75em",
+                paddingTop: "1.5em",
+              }}>
               Auction Closed
             </div>
           )}
         </div>
         <div
-          style={{ padding: "10px", display: "flex", justifyContent: "center" }}
-        >
-          {/* <p>Historic Trend:</p> */}
+          style={{
+            padding: "0.75em",
+            display: "flex",
+            justifyContent: "center",
+          }}>
           {!!priceHistory.data && (
             <LineChart
               xAxis={[
@@ -339,7 +356,7 @@ export default function SingleListing({ userId, axiosAuth }) {
             />
           )}
         </div>
-      </div>
+      </Box>
     </>
   );
 }
