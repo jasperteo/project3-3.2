@@ -146,13 +146,22 @@ export default function SingleListing({ userId, axiosAuth }) {
 
   return (
     <>
-      <div style={{ backgroundColor: "#d4b483" }}>
+      <div style={{ backgroundColor: "#f78888" }}>
         <div style={{ padding: "10px" }}>
-          <img src={listing?.data?.image_link} width="40%" alt="Listing" />
+          <img src={listing?.data?.image_link} width="30%" alt="Listing" />
           <div style={{ fontSize: "13px" }}>{watch?.data?.brand}</div>
           <div style={{ fontSize: "16px" }}>{watch?.data?.model}</div>
+          <div style={{ fontSize: "16px" }}>
+            Description:
+            <br /> {listing?.data?.description}
+          </div>
         </div>
-        <div style={{ padding: "10px" }}>
+        <div
+          style={{
+            padding: "10px",
+            paddingTop: "20px",
+          }}
+        >
           <div
             style={{
               display: "flex",
@@ -161,19 +170,25 @@ export default function SingleListing({ userId, axiosAuth }) {
             }}
           >
             <div style={{ textAlign: "center" }}>
-              <div style={{ fontSize: "24px", margin: "0" }}>
+              <div
+                style={{ fontSize: "24px", margin: "0", fontWeight: "bold" }}
+              >
                 ${listing?.data?.starting_bid}
               </div>
               <div style={{ margin: "0", fontSize: "14px" }}>Start</div>
             </div>
             <div style={{ textAlign: "center" }}>
-              <div style={{ fontSize: "24px", margin: "0" }}>
+              <div
+                style={{ fontSize: "24px", margin: "0", fontWeight: "bold" }}
+              >
                 ${displayBid || initialBid}
               </div>
               <div style={{ margin: "0", fontSize: "14px" }}>Current</div>
             </div>
             <div style={{ textAlign: "center" }}>
-              <div style={{ fontSize: "24px", margin: "0" }}>
+              <div
+                style={{ fontSize: "24px", margin: "0", fontWeight: "bold" }}
+              >
                 ${listing.data.buyout_price}
               </div>
               <div style={{ margin: "0", fontSize: "14px" }}>Buyout</div>
@@ -227,13 +242,27 @@ export default function SingleListing({ userId, axiosAuth }) {
                     padding: "10px",
                   }}
                 >
-                  <Button type="submit" variant="contained" style={{ flex: 1 }}>
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    style={{
+                      flex: 1,
+                      backgroundColor: "#f3d250",
+                      color: "#f78888",
+                      fontWeight: "bold",
+                    }}
+                  >
                     BID NOW
                   </Button>
                   <Button
                     onClick={() => buyout()}
                     variant="contained"
-                    style={{ flex: 1 }}
+                    style={{
+                      flex: 1,
+                      backgroundColor: "#f3d250",
+                      color: "#f78888",
+                      fontWeight: "bold",
+                    }}
                   >
                     BUYOUT
                   </Button>
@@ -276,7 +305,9 @@ export default function SingleListing({ userId, axiosAuth }) {
             </div>
           )}
         </div>
-        <div style={{ padding: "10px" }}>
+        <div
+          style={{ padding: "10px", display: "flex", justifyContent: "center" }}
+        >
           {/* <p>Historic Trend:</p> */}
           {!!priceHistory.data && (
             <LineChart
@@ -288,19 +319,21 @@ export default function SingleListing({ userId, axiosAuth }) {
                     `${value.getFullYear()}-${
                       value.getMonth() + 1
                     }-${value.getDate()}`,
-                  ticks: {
-                    fontColor: "white", // this here
-                  },
-                  gridLines: {
-                    color: "rgba(255, 255, 255, 0.2)",
-                  },
                 },
               ]}
               series={[
                 {
+                  label: "Price (SGD)",
                   data: prices,
                 },
               ]}
+              slotProps={{
+                legend: {
+                  labelStyle: {
+                    fontSize: 14,
+                  },
+                },
+              }}
               width={360}
               height={280}
             />

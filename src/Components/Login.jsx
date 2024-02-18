@@ -13,7 +13,13 @@ export default function Login() {
   }, [isAuthenticated, navigate]);
 
   const LoginButton = () => (
-    <Button variant="contained" onClick={() => loginWithRedirect()}>
+    <Button
+      variant="contained"
+      style={{
+        backgroundColor: "#f78888",
+      }}
+      onClick={() => loginWithRedirect()}
+    >
       Log In
     </Button>
   );

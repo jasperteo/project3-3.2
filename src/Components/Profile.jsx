@@ -35,48 +35,66 @@ export default function Profile({ userId, axiosAuth, userData }) {
   const LogoutButton = () => (
     <Button
       variant="contained"
+      style={{
+        backgroundColor: "#f78888",
+      }}
       onClick={() =>
         logout({ logoutParams: { returnTo: window.location.origin } })
-      }>
+      }
+    >
       Log Out
     </Button>
   );
 
   return (
     <>
-      {isEditing ? (
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <Controller
-            name="username"
-            control={control}
-            defaultValue={userData?.username ?? ""}
-            render={({ field }) => (
-              <TextField
-                {...field}
-                id="username"
-                label="Username"
-                variant="filled"
-                margin="normal"
-              />
-            )}
-          />
-          <br />
-          <Button type="submit" variant="contained">
-            Submit
-          </Button>
-        </form>
-      ) : (
-        <>
-          <h3>Username: {userData?.username || "Please enter username"} </h3>
-          <Button variant="contained" onClick={() => setIsEditing(true)}>
-            Edit Profile
-          </Button>
-        </>
-      )}
-      <br />
-      <br />
-      <div>
-        <LogoutButton />
+      <div className="profile-page">
+        {isEditing ? (
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <Controller
+              name="username"
+              control={control}
+              defaultValue={userData?.username ?? ""}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  id="username"
+                  label="Username"
+                  variant="filled"
+                  margin="normal"
+                />
+              )}
+            />
+            <br />
+            <Button
+              type="submit"
+              variant="contained"
+              style={{
+                backgroundColor: "#f78888",
+              }}
+            >
+              Submit
+            </Button>
+          </form>
+        ) : (
+          <>
+            <h3>Username: {userData?.username || "Please enter username"} </h3>
+            <Button
+              variant="contained"
+              style={{
+                backgroundColor: "#f78888",
+              }}
+              onClick={() => setIsEditing(true)}
+            >
+              Edit Profile
+            </Button>
+          </>
+        )}
+        <br />
+        <br />
+        <div>
+          <LogoutButton />
+        </div>
       </div>
     </>
   );

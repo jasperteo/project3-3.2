@@ -50,8 +50,8 @@ export default function Countdown({ endDate }) {
     <>
       <div>
         <iconify-icon inline icon="ant-design:reload-time-outline" />
-        {timeLeft.days} days, {timeLeft.hours} hours, {timeLeft.minutes}
-        minutes, {timeLeft.seconds} seconds
+        {timeLeft.days} : {timeLeft.hours} : {timeLeft.minutes} :{" "}
+        {timeLeft.seconds}
       </div>
     </>
   );
