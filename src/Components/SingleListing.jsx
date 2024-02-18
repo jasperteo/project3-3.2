@@ -9,7 +9,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { io } from "socket.io-client";
-import { BASE_URL, SOCKET_URL } from "./Constants";
+import { BASE_URL } from "./Constants";
 import Countdown from "./Countdown";
 
 export default function SingleListing({ userId, axiosAuth }) {
@@ -105,7 +105,7 @@ export default function SingleListing({ userId, axiosAuth }) {
   //Socket to communicate and recieve bids
 
   useEffect(() => {
-    const socket = io(`${SOCKET_URL}`);
+    const socket = io(`${BASE_URL}`);
     setSocketBid(socket);
     window.scrollTo(0, 0);
     socket.emit("joinRoom", params.listingId);
