@@ -21,9 +21,19 @@ export default function Payment({ userId, axiosAuth }) {
   return (
     <>
       <h2>Payment Successful!</h2>
-      <Link to="/listings">
-        <Button variant="contained">Go back to Home</Button>
-      </Link>
+      <Button
+        variant="contained"
+        sx={{
+          flex: 1,
+          bgcolor: "#A6D9F7",
+          color: "inherit",
+          fontFamily: "inherit",
+          fontWeight: "550",
+        }}
+        component={Link}
+        to="/listings">
+        Go back to Home
+      </Button>
     </>
   );
 }
