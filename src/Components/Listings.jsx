@@ -90,6 +90,13 @@ export default function Listings({ axiosAuth }) {
                       margin: "auto",
                     }}></CardMedia>
                   <div
+                    style={{
+                      fontSize: index % 3 !== 0 ? "0.6rem" : "1rem",
+                      fontWeight: "700",
+                    }}>
+                    {listing.title}
+                  </div>
+                  <div
                     style={{ fontSize: index % 3 !== 0 ? "0.6rem" : "1rem" }}>
                     {listing.watch.model}
                   </div>
