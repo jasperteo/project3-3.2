@@ -30,7 +30,6 @@ export default function SingleListing({ userId, axiosAuth }) {
   const listing = useQuery({
     queryKey: ["listing", `${BASE_URL}/listings/${params.listingId}`],
     queryFn: () => fetcher(`${BASE_URL}/listings/${params.listingId}`),
-    refetchInterval: 10000,
   });
   const highestBid = useQuery({
     queryKey: ["highestBid", `${BASE_URL}/listings/${params.listingId}/bid`],
