@@ -1,15 +1,9 @@
-# Rocket Academy Coding Bootcamp: Project 3 - Full Stack Application
+# Watch Out!
 
-https://bc.rocketacademy.co/3-backend/3.p-full-stack-app-express
+An app to list watches for sale with a bidding system included!
 
-## Available Scripts
+## 
 
-This project was created using with Vitejs. In the project directory, please run the following commands:
+[Backend](https://github.com/jasperteo/watch-out-backend)
 
-`npm install`
-
-`npm run dev`
-
-The second command will run the app To see the rendered output please open http://localhost:5173 in the browser of your choice, EG: Google Chrome.
-
-The page will reload when you make changes. You may also see any lint errors in the console.
+This project is built using Vite, with Auth0 for authentication, MUI for styling components and socket.io for the live bidding system. 
